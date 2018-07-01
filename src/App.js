@@ -1,10 +1,13 @@
 import React, {Component} from 'react'
 import { View } from 'react-native'
 import firebase from 'firebase'
-import { Header } from './components/common'
+import { Header, Spinner } from './components/common'
 import LoginForm from './components/LoginForm'
+import LogoutForm from './components/LogoutForm'
 
 class App extends Component {
+
+    state = { isLoggedIn: undefined }
 
     componentWillMount() {
         firebase.initializeApp({
@@ -14,14 +17,35 @@ class App extends Component {
             projectId: "authentication-e192f",
             storageBucket: "authentication-e192f.appspot.com",
             messagingSenderId: "618652694893"
-          })  
+          })
+          
+          firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                this.setState({ isLoggedIn: true })
+            } else {
+                this.setState({ isLoggedIn: false })
+            }
+          })
+    }
+
+    renderContent() {
+        switch(this.state.isLoggedIn) {
+            case undefined:
+            return <Spinner /> 
+            
+            case true:
+            return <LogoutForm />
+
+            case false:
+            return <LoginForm />
+        }
     }
 
     render() {
         return (
             <View>
                 <Header headerText="Authentication" />
-                <LoginForm />
+                { this.renderContent() }
             </View>
         )
     }
